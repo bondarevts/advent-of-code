@@ -1,21 +1,49 @@
-export function solve1(data: string): void {
-  // only 12 red cubes, 13 green cubes, and 14 blue cubes
-  const maxCubes = {
-    red: 12,
-    green: 13,
-    blue: 14
-  }
+type Color = "red" | "green" | "blue"
+type Reveal = {
+  count: number
+  color: Color
+}
 
-  const result = 
-    data.trimEnd().split("\n").map((line, index) => {
-      const gameNumber = index + 1
-      const allDrawsSuccessful = line.split(": ")[1].split("; ").every(drawString => 
-        drawString.split(", ").every(cubeColorString => {
-          const [cubesString, color] = cubeColorString.split(" ")
-          return Number(cubesString) <= maxCubes[color as "red" | "green" | "blue"]
-        })
-      )
-      return allDrawsSuccessful ? gameNumber : 0
-    }).reduce((acc, value) => acc + value, 0)
+type Game = {
+  reveals: Reveal[]
+  number: number
+}
+
+const MAX_CUBES = {
+  red: 12,
+  green: 13,
+  blue: 14
+}
+
+export function solve1(data: string): void {
+  const games = parseGames(data.trimEnd())
+  const result = games.filter(isLegalGame).map(game => game.number).reduce((acc, value) => acc + value)
   console.log(result)
+}
+
+function isLegalGame(game: Game): boolean {
+  return game.reveals.every(reveal => reveal.count <= MAX_CUBES[reveal.color])
+}
+
+function parseGames(data: string): Game[] {
+  return data.split("\n").map(parseGame)
+}
+
+function parseGame(gameString: string): Game {
+  const [gameDescription, gameRevealsSet] = gameString.split(": ")
+  
+  const gameNumber = Number(gameDescription.split(" ")[1])
+
+  return {
+    number: gameNumber,
+    reveals: gameRevealsSet.replace(/;/g, ",").split(", ").map(parseReveal)
+  }
+}
+
+function parseReveal(reveal: string): Reveal {
+  const [count, cubeColor] = reveal.split(" ")
+  return {
+    count: Number(count),
+    color: cubeColor as Color
+  }
 }
