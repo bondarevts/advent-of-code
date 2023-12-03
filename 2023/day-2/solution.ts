@@ -21,6 +21,13 @@ export function solve1(data: string): void {
   console.log(result)
 }
 
+
+export function solve2(data: string): void {
+  const games = parseGames(data.trimEnd())
+  const result = games.map(solveGame).reduce((acc, value) => acc + value, 0)
+  console.log(result)
+}
+
 function isLegalGame(game: Game): boolean {
   return game.reveals.every(reveal => reveal.count <= MAX_CUBES[reveal.color])
 }
@@ -46,4 +53,13 @@ function parseReveal(reveal: string): Reveal {
     count: Number(count),
     color: cubeColor as Color
   }
+}
+
+function solveGame(game: Game): number {
+  const maxPerColor = game.reveals.reduce((maxCounts, reveal) => {
+    maxCounts[reveal.color] = Math.max(maxCounts[reveal.color], reveal.count)
+    return maxCounts
+  }, {red: 0, blue: 0, green: 0})
+
+  return maxPerColor.red * maxPerColor.green * maxPerColor.blue
 }
