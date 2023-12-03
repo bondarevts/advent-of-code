@@ -14,11 +14,16 @@ async function runSolution() {
   switch (process.argv[2]) {
     case "solve":
       dataset = `${datasetFolder}/dataset.txt`
-    
       break;
-    case "test": 
-      dataset = `${datasetFolder}/test${level}.txt`
+
+    case "test":
+      if (process.argv[5]) {
+        dataset = `${datasetFolder}/${process.argv[5]}.txt`
+      } else {
+        dataset = `${datasetFolder}/test${level}.txt`
+      }
       break;
+
     default:
       throw new Error("Wrong mode")
   }
