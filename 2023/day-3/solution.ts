@@ -1,52 +1,68 @@
 type PartNumber = {
   value: string
-  lineNumber: number
-  position: number
+  position: Position
 }
 
-export function solve1(data: string):void {
-  const lines = data.trimEnd().split("\n")
+type Position = {
+  y: number
+  x: number
+}
+
+export function solve1(data: string): void {
+  const lines = data.trimEnd().split('\n')
   const potentialPartNumbers = findPotentialPartNumbers(lines)
-  const result = 
-    potentialPartNumbers
-    .filter(p => isLegalPartNumber(p, lines))
+  const result = potentialPartNumbers
+    .filter((p) => isLegalPartNumber(p, lines))
     .reduce((acc, partNumber) => acc + Number(partNumber.value), 0)
   console.log(result)
 }
 
 function findPotentialPartNumbers(lines: string[]): PartNumber[] {
-  return lines.flatMap((line, index) => parseLine(line, index))
+  return lines.flatMap((line, index) => parsePartNumbersFromLine(line, index))
 }
 
-function parseLine(line: string, index: number): PartNumber[] {
-  const partNumbers = []
+function parsePartNumbersFromLine(line: string, index: number): PartNumber[] {
+  const partNumbers: PartNumber[] = []
   for (const match of line.matchAll(/\d+/g)) {
     partNumbers.push({
       value: match[0],
-      lineNumber: index,
-      position: match.index!
+      position: {
+        y: index,
+        x: match.index!,
+      },
     })
   }
   return partNumbers
 }
 
-function isLegalPartNumber(partNumber: PartNumber, lines: string[]): boolean {
-  let positionsToCheck: [number, number][] = [
-    [partNumber.lineNumber, partNumber.position - 1],
-    [partNumber.lineNumber, partNumber.position + partNumber.value.length]
+function getValidBorderPositions(
+  position: Position,
+  length: number,
+  lines: string[],
+): Position[] {
+  const borderPositions: Position[] = [
+    { y: position.y, x: position.x - 1 },
+    { y: position.y, x: position.x + length },
   ]
 
-  for (let start = partNumber.position - 1; start <= partNumber.position + partNumber.value.length; start++) {
-    positionsToCheck.push([partNumber.lineNumber - 1, start])
-    positionsToCheck.push([partNumber.lineNumber + 1, start])
+  for (let start = position.x - 1; start <= position.x + length; start++) {
+    borderPositions.push({ y: position.y - 1, x: start })
+    borderPositions.push({ y: position.y + 1, x: start })
   }
 
-  console.log(partNumber)
-  console.log(positionsToCheck)
-  positionsToCheck = positionsToCheck.filter(([line, position]) => 
-    line >= 0 && line < lines.length && position >= 0 && position < lines[0].length
+  return borderPositions.filter(
+    (position) =>
+      position.y >= 0 &&
+      position.y < lines.length &&
+      position.x >= 0 &&
+      position.x < lines[0].length,
   )
-  console.log(positionsToCheck)
+}
 
-  return positionsToCheck.some(([line, position]) => lines[line][position] != '.')
+function isLegalPartNumber(partNumber: PartNumber, lines: string[]): boolean {
+  return getValidBorderPositions(
+    partNumber.position,
+    partNumber.value.length,
+    lines,
+  ).some((position) => lines[position.y][position.x] != '.')
 }
