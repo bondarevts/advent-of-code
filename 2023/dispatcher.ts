@@ -12,20 +12,20 @@ async function runSolution() {
   const datasetFolder = `${process.cwd()}/${dayFolder}`
   let dataset: string
   switch (process.argv[2]) {
-    case "solve":
+    case 'solve':
       dataset = `${datasetFolder}/dataset.txt`
-      break;
+      break
 
-    case "test":
+    case 'test':
       if (process.argv[5]) {
         dataset = `${datasetFolder}/${process.argv[5]}.txt`
       } else {
         dataset = `${datasetFolder}/test${level}.txt`
       }
-      break;
+      break
 
     default:
-      throw new Error("Wrong mode")
+      throw new Error('Wrong mode')
   }
 
   console.log(`Running on the dataset: ${dataset}`)
