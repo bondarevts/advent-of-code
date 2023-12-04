@@ -30,7 +30,7 @@ async function runSolution() {
 
   console.log(`Running on the dataset: ${dataset}`)
   const data = fs.readFileSync(dataset, 'utf8')
-  solution[`solve${level}`](data)
+  solution[`solve${level}`](data.trimEnd())
 }
 
 runSolution()

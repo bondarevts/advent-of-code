@@ -16,7 +16,7 @@ const MAX_CUBES = {
 }
 
 export function solve1(data: string): void {
-  const games = parseGames(data.trimEnd())
+  const games = parseGames(data)
   const result = games
     .filter(isLegalGame)
     .map((game) => game.number)
@@ -25,7 +25,7 @@ export function solve1(data: string): void {
 }
 
 export function solve2(data: string): void {
-  const games = parseGames(data.trimEnd())
+  const games = parseGames(data)
   const result = games.map(solveGame).reduce((acc, value) => acc + value, 0)
   console.log(result)
 }
