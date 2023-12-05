@@ -13,7 +13,7 @@ export function solve1(data: string): void {
 }
 
 export function solve2(data: string): void {
-  const matchesPerCard = data.split("\n").map(parseCardInfo).map(matchesCount)
+  const matchesPerCard = data.split('\n').map(parseCardInfo).map(matchesCount)
   const cardCounts = Array(matchesPerCard.length).fill(1)
   matchesPerCard.forEach((matches, index) => {
     const currentCardsCount = cardCounts[index]
@@ -21,7 +21,7 @@ export function solve2(data: string): void {
       cardCounts[i] += currentCardsCount
     }
   })
-  console.log(sum(cardCounts))  
+  console.log(sum(cardCounts))
 }
 
 function parseCardInfo(line: string): CardInfo {
