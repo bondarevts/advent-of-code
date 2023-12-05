@@ -5,11 +5,23 @@ type CardInfo = {
   myNumbers: string[]
 }
 
-export function solve1(data: string) {
+export function solve1(data: string): void {
   const result = sum(
     data.split('\n').map(parseCardInfo).map(calculateCardScore),
   )
   console.log(result)
+}
+
+export function solve2(data: string): void {
+  const matchesPerCard = data.split("\n").map(parseCardInfo).map(matchesCount)
+  const cardCounts = Array(matchesPerCard.length).fill(1)
+  matchesPerCard.forEach((matches, index) => {
+    const currentCardsCount = cardCounts[index]
+    for (let i = index + 1; i < index + 1 + matches; i++) {
+      cardCounts[i] += currentCardsCount
+    }
+  })
+  console.log(sum(cardCounts))  
 }
 
 function parseCardInfo(line: string): CardInfo {
