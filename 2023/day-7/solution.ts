@@ -14,6 +14,7 @@ type Label =
   | '4'
   | '3'
   | '2'
+  | '1' // as a Joker for the second part of the task
 
 type HandType =
   | 'Five of a kind'
@@ -50,10 +51,23 @@ const power: Map<Label, number> = new Map([
   ['2', 2],
 ])
 
-type Hand = {
-  value: Label[]
-  strength: number
-}
+const power2: Map<Label, number> = new Map([
+  ['A', 14],
+  ['K', 13],
+  ['Q', 12],
+  ['T', 10],
+  ['9', 9],
+  ['8', 8],
+  ['7', 7],
+  ['6', 6],
+  ['5', 5],
+  ['4', 4],
+  ['3', 3],
+  ['2', 2],
+  ['J', 1],
+])
+
+type Hand = Label[]
 
 type Game = {
   hand: Hand
@@ -63,21 +77,41 @@ type Game = {
 export function solve1(data: string): void {
   const games = data
     .split('\n')
-    .map(parseGame)
-    .sort((game1, game2) => handComparator(game1.hand, game2.hand))
+    .map((line) => parseGame(line))
+    .sort((game1, game2) =>
+      handComparator(game1.hand, game2.hand, calculateHandStrength, power),
+    )
   const result = sum(games.map((game, index) => game.bid * (index + 1)))
   console.log(result)
 }
 
-function handComparator(hand1: Hand, hand2: Hand): number {
-  if (hand1.strength !== hand2.strength) {
-    return hand1.strength - hand2.strength
+export function solve2(data: string): void {
+  const games = data
+    .split('\n')
+    .map((line) => parseGame(line))
+    .sort((game1, game2) =>
+      handComparator(game1.hand, game2.hand, calculateHandStrength2, power2),
+    )
+  const result = sum(games.map((game, index) => game.bid * (index + 1)))
+  console.log(result)
+}
+
+function handComparator(
+  hand1: Hand,
+  hand2: Hand,
+  strengthCalculator: (hand: Hand) => number,
+  labelPower: Map<Label, number>,
+): number {
+  const strength1 = strengthCalculator(hand1)
+  const strength2 = strengthCalculator(hand2)
+  if (strength1 !== strength2) {
+    return strength1 - strength2
   }
   for (let i = 0; i < 5; i++) {
-    const label1 = hand1.value[i]
-    const label2 = hand2.value[i]
+    const label1 = hand1[i]
+    const label2 = hand2[i]
     if (label1 !== label2) {
-      return power.get(label1)! - power.get(label2)!
+      return labelPower.get(label1)! - labelPower.get(label2)!
     }
   }
   return 0
@@ -85,12 +119,8 @@ function handComparator(hand1: Hand, hand2: Hand): number {
 
 function parseGame(line: string): Game {
   const handAndBid = line.split(' ')
-  const handLabels = handAndBid[0] as unknown as Label[]
   return {
-    hand: {
-      value: handLabels,
-      strength: calculateHandStrength(handLabels),
-    },
+    hand: Array.from(handAndBid[0]) as unknown as Hand,
     bid: Number(handAndBid[1]),
   }
 }
@@ -129,4 +159,26 @@ function countCards(labels: Label[]): Map<Label, number> {
     counts.set(label, (counts.get(label) ?? 0) + 1)
   }
   return counts
+}
+
+function calculateHandStrength2(labels: Label[]): number {
+  return typeToStrength.get(getHandType2(labels))!
+}
+
+function getHandType2(hand: Hand): HandType {
+  return getHandType(transformToMostValuableHand(hand))
+}
+
+function transformToMostValuableHand(hand: Hand): Hand {
+  const counts = countCards(hand)
+
+  counts.delete('J')
+  counts.set('1', -1) // to serve as the current maximum for counts
+  const maxNonJokerLabel = Array.from(counts).reduce(
+    (currentMax, [key, value]) =>
+      value > counts.get(currentMax)! ? key : currentMax,
+    '1' as Label,
+  )
+
+  return hand.map((value) => (value !== 'J' ? value : maxNonJokerLabel))
 }
